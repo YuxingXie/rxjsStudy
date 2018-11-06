@@ -253,7 +253,7 @@ source$.subscribe(data=> console.log(data));
 
 * isDone
 
-可以参考java中迭代器接口方法:iterator();next();hasNext();
+可以参考java中迭代器接口Iterator方法:iterator();next();hasNext();
 
 ##### 推与拉
 RxJS中由发布者推消息而不是观察者拉消息。
