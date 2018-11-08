@@ -1,0 +1,17 @@
+{
+  "name": "rxjsStudy",
+  "version": "1.0.0",
+  "dependencies": {
+    "core-js": "^2.4.1",
+    "rxjs": "^5.5.2",
+    "zone.js": "^0.8.14"
+  },
+  "devDependencies": {
+    "babel-jest": "20.0.3",
+    "babel-core": "^6.26.0",
+    "babel-cli": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.6.1",
+    "babel-plugin-transform-runtime": "^6.23.0"
+  }
+}
