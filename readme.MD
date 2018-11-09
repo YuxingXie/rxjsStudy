@@ -305,7 +305,7 @@ OnSubscribe函数接受一个名为observer的参数，函数体内，调用参�
 Publisher.java:
 ```java
 /**
- * 发布者，当发布者被订阅的时候执行onSubscribe方法
+ * 发布者，它被Observable对象持有，当Observable被订阅的时候执行onSubscribe方法，注意这个方法使用了Observer类
  */
 public class Publisher {
     public void onSubscribe(Observer observer){
@@ -348,10 +348,45 @@ public class Observable {
         Observer observer=new Observer() {
             @Override
             public void next(Object item) {
-                System.out.println(item);
+            System.out.println("next item is:"+item);
             }
         };
         Observable source$=new Observable(new Publisher());
         source$.subscribe(observer);
 ```
 
+我这里抽象出了一个Publisher.java类，代表发布者。类之间的关系是：Observable持有Publisher，Publisher使用Observer。这个程序真能实现发布者发布任何消息，观察者一定能够
+执行它的next方法吗？我把程序稍微改了一下，让Publisher可以接受键盘输入：
+```java
+import java.io.IOException;
+import java.util.Scanner;
+
+/**
+ * 发布者持有一个观察者，当发布者被订阅的时候执行onSubscribe方法
+ */
+public class Publisher {
+    public void onSubscribe(Observer observer) throws IOException {
+        Scanner input = new Scanner(System.in);
+        String item = null;       // 记录输入的字符串
+        while (true){
+            System.out.print("请输入：");
+            item = input.next();// 等待输入值
+            observer.next(item);
+        }
+    }
+}
+```
+看看执行结果
+```text
+请输入：3
+next item is:3
+请输入：6
+next item is:6
+请输入：666
+next item is:666
+请输入：koko
+next item is:koko
+请输入：
+```
+
+莫名其妙程序就按预期执行成功了。当然肯定有其道理的，不如我们分析分析。
