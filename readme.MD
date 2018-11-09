@@ -4,7 +4,7 @@
 
 目的：angular使用了RxJS，简单的目的是为了用好angular,更深层的目的是了解一种编程方式，掌握一门技巧，提高生产力。
 
-如果该项目的学习让我能够理解angular中的RxJS使用，我或许可能会停止学习。如果我觉得它可以应用在更广的范围，我会深入学习它。
+如果该项目的学习让我能够理解angular中的RxJS使用，我或许可能会停止学习。如果我觉得它可以应用在更广的范围，我会深入学习它。如果它能代替jQuery,那么它也是值得学习的。
 
 书中原文用斜体字表示。
 
@@ -284,11 +284,74 @@ const theObserver ={//我把theObserver称为观察器(习惯上xx器代表一�
 };
 source$.subscribe(theObserver);
 ```
-和作者的代码大致类似，加了一些注释而已，可能理解不一定正确，先写上，有错再改。
+和作者的代码大同小异，并加了一些注释而已，可能理解不一定正确，先写上，有错再改。
 
 分析代码：
 
 * 第一步：导入Observable类(大概是node版本的原因不能使用import语法，使用了require语法)；
 
-* 第二步：创造一个函数onSubscribe，这个函数会作为Observable构造函数的参数，这个寒素参数(onSubscribe)完全决定了Observable对象的行为(迭代推送数据)
+* 第二步：创造一个函数onSubscribe，这个函数会作为Observable构造函数的参数，这个函数参数(onSubscribe)完全决定了Observable对象的行为(迭代推送数据)。
+OnSubscribe函数接受一个名为observer的参数，函数体内，调用参数observer的next函数，把数据"推"给observer；
+
+* 第三步：调用Observable构造函数，产生一个名为source$的数据流对象；
+
+* 第四步：创造观察者theObserver;
+
+* 第五步：通过subscribe函数将theObserver和source$关联起来。
+
+我在这里停顿了很久。我试图用一个面向对象的模型（java）来思考这几步，虽然程序在语法上是通的，但是我并不敢确定是否表达了上述意思。下面贴出这些代码：
+
+
+Publisher.java:
+```java
+/**
+ * 发布者，当发布者被订阅的时候执行onSubscribe方法
+ */
+public class Publisher {
+    public void onSubscribe(Observer observer){
+        observer.next(1);
+        observer.next(2);
+        observer.next(3);
+    }
+}
+```
+
+
+Observer.java:
+```java
+public abstract class Observer {
+    public abstract void next(Object item);
+}
+
+```
+
+Observable.java:
+```java
+/**
+ * 这里模拟实现一个可观察对象，它能推送消息给观察者
+ */
+public class Observable {
+    private Publisher publisher;
+    public Observable(Publisher publisher) {
+        this.publisher = publisher;
+    }
+
+    public void subscribe(Observer observer){
+        this.publisher.onSubscribe(observer);
+    }
+   
+}
+```
+实现订阅:
+```java
+
+        Observer observer=new Observer() {
+            @Override
+            public void next(Object item) {
+                System.out.println(item);
+            }
+        };
+        Observable source$=new Observable(new Publisher());
+        source$.subscribe(observer);
+```
 
