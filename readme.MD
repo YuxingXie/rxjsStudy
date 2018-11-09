@@ -368,7 +368,7 @@ public class Publisher {
         while (true){
             System.out.print("请输入：");
             item = input.next();// 等待输入值
-            observer.next(item);
+            observer.next(item);//这一句代码确保发布者发布任何消息时，观察者的next方法必然被执行
         }
     }
 }
@@ -388,3 +388,6 @@ next item is:koko
 
 程序按预期执行成功了。道理很简单，可观察对象被订阅的时候，它执行了发布者的onSubscribe方法，而这个方法使用了observer对象的next方法，即打印next方法的参数item。
 当onSubscribe方法永无休止的接受键盘输入时，观察者的next方法永不休止的执行着。
+
+该java项目gitHub: https://github.com/YuxingXie/aes-base64
+
