@@ -356,14 +356,11 @@ public class Observable {
 ```
 
 我这里抽象出了一个Publisher.java类，代表发布者。类之间的关系是：Observable持有Publisher，Publisher使用Observer。这个程序真能实现发布者发布任何消息，观察者一定能够
-执行它的next方法吗？我把程序稍微改了一下，让Publisher可以接受键盘输入：
+执行它的next方法吗？我把程序稍微改了一下，让Publisher可以接受键盘输入，表示发布者可以永不停止的发布消息：
 ```java
 import java.io.IOException;
 import java.util.Scanner;
 
-/**
- * 发布者持有一个观察者，当发布者被订阅的时候执行onSubscribe方法
- */
 public class Publisher {
     public void onSubscribe(Observer observer) throws IOException {
         Scanner input = new Scanner(System.in);
