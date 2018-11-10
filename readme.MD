@@ -392,3 +392,106 @@ next item is:koko
 
 该java项目gitHub: https://github.com/YuxingXie/aes-base64
 
+w我们看看Observer这个角色，它仅仅关注如何处理消息。当数据流被订阅时，它被当做参数传入。
+
+现在再看看作者的说明，我顿时觉得清晰了。
+
+#### 2.2.4.跨越时间的Observable
+
+这个和我改写成键盘输入的例子类似，就不再多说。理念是；推数据的是onSubscribe函数。在我的例子中，它被抽象为一个Publisher，所以看起来我的理解是对的。
+
+#### 2.2.5.永无止境的Observable
+
+同上
+
+#### 2.2.6.Observable的完结
+
+既然我们可以让发布者调用Observer的next方法表示如何处理下一条数据，那为什么不指定另一个方法表示当没有新消息时的处理函数呢？当然是可以的。
+
+我们把这个函数命名为complete,它不需要参数。
+
+到这里，我们思考一下，为什么这些函数的命名有约定吗？它是某个接口的实例吗？我猜应该是的，否则发布者和数据流的提供商如何与观察者的提供商通讯呢？
+
+#### 2.2.7.Observable的出错处理
+
+next表示处理数据，complete表示数据没有了，而error则表示出错。
+
+RxJS中，一个Observable对象只有一种中介状态，要么完结(complete)，要么错误(error)。当Observer同时定义了error和complete时，如果报错，这个Observable就完结，不会有complete了。
+
+#### 2.2.8.Observer的简单形式
+
+并不是所有情况都需要next,error和complete函数。subscribe函数有另一种表示法，它不必传一个Observer对象，而是可以传递函数，第一个参数如果是函数，被认为是next,第二个函数则是error,
+第三个是complete，如下：
+```javascript
+source$.subscribe(
+    item => console.log(item),
+    err => console.log(err),
+    ()=>console.log('No More Data')
+    );
+```
+或者用null代替。
+
+### 2.3.退订Observable
+
+代码见： chapter-02/Unsubscribe.js
+
+退订(unsubscribe)就是解除Observable和Observer之间的关系。
+
+实现方法是：调用subscribe的返回对象的unsubscribe方法，如下：
+```javascript
+const source$ = new Observable(onSubscribe);
+const subscription = source$.subscribe(item=> console.log(item));
+setTimeout(()=>{
+    subscription.unsubscribe();
+},3500);
+
+```
+具体的退订方法由发布方实现。退订确实实现了observer对象传入的next方法不再执行，不过在代码中看不到这个逻辑，我只能认为这个功能是有RxJS体系完成的。
+
+### 2.4.Hot Observable和Cold Observable
+
+理解概念为主，详细讲解将会在第十章。
+
+我之前的Java代码中自己抽象了一个Publisher，实际上，可能叫做Producer(生产者)更合适。回忆下之前的Java代码：
+```java
+    Observable source$ = new Observable(new Publisher());
+```
+
+我们创建可观察对象时传入了一个发布者(或者叫生产者)，它是一个new出来的实例，表明这个可观察对象使用一个全新的生产者，这个观察者叫叫做冷的可观察者。
+而当这个生产者独立于Observable时，这个Observable叫Hot Observable。
+
+
+
+### 2.5.操作符简介
+
+操作符类似于angular中管道的概念，表示在subscribe之前对Observable对象进行的一系列操作。这些操作应该都是可以链式调用的。
+
+书中提到的操作符：
+
+* create:创建一个Observable实例，如：Observable.create(onSubscribe)
+
+* map：在一个Observable实例上使用，如：Observable.create(onSubscribe).map(x=>x*x)，返回一个全新的Observable，将前一个可观察对象的数据项平方
+
+还有我们在angular中使用的of应该也算一个操作符吧。
+
+更多的操作符之后介绍。并且，它是一个使用极其频繁的东西。
+
+### 2.6.弹珠图
+
+一种数据流的图示法，可以了解一下。
+
+### 2.7.小结
+
+一般书的小结是记流水账，所以我都是自己总结。
+
+Observable既然被称作"数据流"，那么它是如何"流"的呢？其实到这里应该清楚了，实际上是onSubscribe方法调用了观察者的next方法，把数据作为参数传进去这样"流"的。
+
+还要清楚一点，在接触hot Observable之前，我们可以认为：直到观察者订阅可观察对象的那一刻，生产者才开始真正产生数据。
+
+生产者和消费者模式是一种设计模式，它简化了数据传递的模型。我没记错的话，四人帮的设计模式中没提到这种模式。这个容我再去翻翻书。
+
+
+## 第三章 操作符基础
+
+
+
