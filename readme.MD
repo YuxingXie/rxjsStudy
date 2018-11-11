@@ -658,3 +658,86 @@ Cold Observable如果没有订阅，不会产生数据；Hot Observable没有订
 多播就是指多个订阅者接收到即时由数据发布者生产的数据，它有个近义词：直播。
 
 ### 10.3.Subject
+
+把Cold Observable变成Hot Observable的关键就是使用Subject。
+
+转换需要一个"中间人"，这个中间人的职责：
+
+* 提供subscribe方法，让其能够订阅自己的数据源；
+* 能够有办法接受推送的数据，包括Cold Observable推送的数据。
+
+所以中间人既是Observable又是Observer。
+
+Subject同时实现了Observable和Observer接口，它可以充当中间人。
+
+#### 10.3.1.两面神Subject
+
+chapter-10/SimpleSubject.js:
+```javascript
+const { Subject } =require('rxjs/Subject');
+require('rxjs/add/observable/interval');
+require ('rxjs/add/operator/map');
+
+const subject =new Subject();
+
+subject.map(x => x*2).subscribe(
+    value => console.log('on data: '+value),
+    err => console.log('on error: '+err),
+    ()=> console.log('on complete')
+);
+
+subject.next(1);
+subject.next(2);
+subject.next(3);
+subject.complete();
+```
+
+控制台打印：
+```text
+on data: 2
+on data: 4
+on data: 6
+on complete
+```
+分析：
+1. new Subject的时候调用的是无参构造方法，而不需要传入一个生产者。所以当它被subscribe的时候，观察者是观察不到数据的；
+2. 生产数据的next方法调用是在subscribe之后执行的；
+3. 整个程序的流程已经变化了，之前Observable被订阅之后立即产生数据，现在产生数据却由Subject控制。
+
+Subject维护一个Observer列表，它知道该给谁发消息，先到先得，后加入的观察者收不到订阅前的消息。
+
+下面是一个有多个订阅者的例子：
+
+chapter-10/MultiObserverSubject.js：
+```javascript
+
+const { Subject } =require('rxjs/Subject');
+
+const subject =new Subject();
+
+const subscription1=subject.subscribe(
+    value => console.log('on observer 1 data: '+value),
+    err => console.log('on observer 1 error: '+err),
+    ()=> console.log('on observer 1 complete')
+);
+
+subject.next(1);
+
+const subscription2=subject.subscribe(
+    value => console.log('on observer 2 data: '+value),
+    err => console.log('on observer 2 error: '+err),
+    ()=> console.log('on observer 2 complete')
+);
+
+subject.next(2);
+subscription1.unsubscribe();
+subject.complete();
+``` 
+
+打印：
+```text
+on observer 1 data: 1
+on observer 1 data: 2
+on observer 2 data: 2
+on observer 2 complete
+```
