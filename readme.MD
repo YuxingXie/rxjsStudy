@@ -537,6 +537,10 @@ create,of等创建类操作符是静态操作符
 从第四章开始到第八章，讲的是各种操作符的使用。在我看来，入门了基本理论后，应用层面只需要一本随时可以翻阅的工具书足矣。当我们想
 了解某一类操作符时，可以翻书查看。所以第四章到第八章略过。
 
+网上找到一个RxJS的学习网站，并且还是中文的：https://cn.rx.js.org/class/es6/Observable.js~Observable.html
+
+所谓操作符就是Observable的静态或实例方法，在上面都可以找到。
+
 第九章和第十章我决定先研究第十章：多播。
 
 
@@ -575,5 +579,41 @@ create,of等创建类操作符是静态操作符
 <td>拥有默认数据的多播</td>
 <td>publishBehavior</td>
 </tr>
-
 </table>
+
+### 10.1.数据流的多播
+
+_在RxJS中，Observable和Observer的关系，就是前者在播放内容，后者在收听内容。播放内容的方式可以分为三种：_
+
+* 单播(unicast)：一个接收者
+* 广播(broadcast)：所有接收者，并不是RxJS支持的目标
+* 多播(multicast)：指定多个接收者
+
+RxJS的Observable可以被多次subscribe，表明可以支持多播。
+
+下面是一个**看起来像**多播的代码例子：
+
+chapter-10/LikeMulticast.js
+```javascript
+const {Observable} = require('rxjs/Rx') ;
+require('rxjs/add/observable/interval');
+require('rxjs/add/operator/take');
+
+const tick$ = Observable.interval(1000).take(3);
+
+tick$.subscribe(value => console.log('observer 1:'+value));
+
+setTimeout(()=>{
+    tick$.subscribe(value => console.log('observer 2:'+value))
+},2000);
+```
+
+
+```text
+interval(period: number, scheduler: Scheduler): Observable
+创建一个 Observable ，该 Observable 使用指定的 IScheduler ，并以指定时间间隔发出连续的数字。
+
+take(count: number): Observable<T>
+只发出源 Observable 最初发出的的N个值 (N = count)。
+
+```
