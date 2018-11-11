@@ -741,3 +741,9 @@ on observer 1 data: 2
 on observer 2 data: 2
 on observer 2 complete
 ```
+
+大家自己分析一下结果，一切都在意料中。
+
+#### 10.3.2.用Subject实现多播
+
+我们可以认为Hot Observable是"生产者"独立于订阅行为之外的Observable
