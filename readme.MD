@@ -746,4 +746,81 @@ on observer 2 complete
 
 #### 10.3.2.用Subject实现多播
 
-我们可以认为Hot Observable是"生产者"独立于订阅行为之外的Observable
+我们可以认为Hot Observable是"生产者"独立于订阅行为之外的Observable.
+
+chapter-10/RealMultiCast.js:
+```javascript
+const {Observable} = require('rxjs/Rx') ;
+const { Subject } =require('rxjs/Subject');
+require('rxjs/add/observable/interval');
+require ('rxjs/add/operator/map');
+
+
+const tick$ = Observable.interval(1000).take(3);
+const subject =new Subject();
+
+tick$.subscribe(subject);//subject被作为观察者
+
+subject.subscribe(value => console.log('observer 1: '+value));//这里subject被订阅，成了Observable
+
+/**
+ * 我这样理解不知道对不对：Subject作为观察者其实只是充当了一个作者所说的"中间人"角色，毕竟，观察者也可以充当发布者，因为它把观察到的东西发布
+ 出去就相当于充当了发布者的角色。所以它也可以被订阅为发布者，在它自身调用subscribe方法，把它观察到的数据发布给另一个观察者。
+ */
+
+
+setTimeout(()=>{
+    subject.subscribe(value => console.log('observer 2: '+value))
+},1500);
+```
+
+运行结果：
+```text
+observer 1: 0
+observer 1: 1
+observer 2: 1
+observer 1: 2
+observer 2: 2
+```
+
+#### 10.3.3. makeHot操作符
+
+_Subject可以实现多播，但它是一个对象而不是操作符，所以无法链式调用，不过，可以创造一个新的操作符来达到链式调用的效果。_
+
+makeHot不是RxJS自带的操作符，所以略过。
+
+#### 10.3.4.Subject不能重复使用
+#### 10.3.5.Subject可以有多个上游
+#### 10.3.6.Subject的错误处理
+
+### 10.4.支持多播的操作符
+
+最基础的操作符：
+* multicast
+* share
+* publish
+
+作者篇幅巨大，学还是不学呢？想了一下，还是学吧，不过只挑重点。
+
+#### 10.4.1.multicast
+
+操作符说明：
+```text
+multicast(subjectOrSubjectFactory: Function | Subject, selector: Function): Observable
+返回的 Observable 发出对 ConnectableObservable 发出的项调用一个指定的 selector 函数的结果， 
+ConnectableObservable 可以在潜在的多个流之间共享单个 subscription 。
+```
+
+使用示例：
+```javascript
+const hotSource$ = coldSource$.multicast(new Subject());
+```
+
+还是觉得先跳过比较好，略，直接下一章。
+
+## 第十一章：掌握时间的Scheduler
+
+
+
+
+
