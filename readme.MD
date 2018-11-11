@@ -605,9 +605,17 @@ tick$.subscribe(value => console.log('observer 1:'+value));
 
 setTimeout(()=>{
     tick$.subscribe(value => console.log('observer 2:'+value))
-},2000);
+},1500);
 ```
-
+运行结果：
+```text
+observer 1:0
+observer 1:1
+observer 2:0
+observer 1:2
+observer 2:1
+observer 2:2
+```
 
 ```text
 interval(period: number, scheduler: Scheduler): Observable
@@ -617,3 +625,35 @@ take(count: number): Observable<T>
 只发出源 Observable 最初发出的的N个值 (N = count)。
 
 ```
+上面例子中，observer 2是间隔1.5秒才订阅的，但打印结果显示它并没有错过订阅之前Observable吐出的0。
+
+_为什么会是这个结果呢？因为interval这个操作符产生的是一个Cold Observable对象。_
+
+### 10.2.Hot和Cold数据流差异
+
+2.4中介绍过，Cold Observable就是每次被订阅都产生一个全新的数据序列的数据流。
+
+我的理解是，Cold Observable对象每次被订阅时，都会创建一个新的生产者，所以订阅时它又会重新执行一次产生数据的方法。
+
+绝大部分创建类操作符创建的Observable都是Cold Observable，如：
+* interval
+* range
+
+以下几个创建Hot Observable：
+* fromPromise
+* fromEvent
+* fromEventPattern
+
+Cold Observable如果没有订阅，不会产生数据；Hot Observable没有订阅的情况下，数据依然会产生，只不过不传入数据管道。
+
+然后作者下结论说，Cold Observable实现的是单播，Hot Observable实现的是多播，我对这个突然到来的结论有点懵。
+
+我看了一下作者用超级马里奥举滴栗子，我大概明白了，他其实想实现的是"直播"，需要即时的数据，显然Cold Observable确实做不到，而Hot Observable
+因为不断产生数据，所以是可以实现"直播"。
+
+或者我这里讲的"直播"其实是"多播"的真正含义，作者开头定义的"多播"是错的。
+
+我回头看了一下2.4节，比较确定了作者在本章所定义的"多播"概念是错的。不如我重新给多播进行定义：
+
+多播就是指多个订阅者接收到即时由数据发布者生产的数据，它有个近义词：直播。
+

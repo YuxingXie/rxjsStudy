@@ -10,4 +10,4 @@ tick$.subscribe(value => console.log('observer 1:'+value));
 
 setTimeout(()=>{
     tick$.subscribe(value => console.log('observer 2:'+value))
-},2000);
+},1500);
