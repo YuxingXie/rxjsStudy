@@ -820,6 +820,7 @@ const hotSource$ = coldSource$.multicast(new Subject());
 
 ## 第十一章：掌握时间的Scheduler
 
+不弄了，第一轮学习到此结束
 
 
 
