@@ -205,6 +205,11 @@ import Rx from 'rxjs/Rx';
 import { Observable, of } from 'rxjs';
 ```
 这是一种推荐的使用方式，只导入需要使用的模块功能。
+```text
+    后面第二章中的例子，CreateObservable.js使用 import { Observable, of } from 'rxjs'导入是报错的，原因是js不支持这种语法吧(可能),我将它改写为ts再用tsc命令编译为js就不报错了。
+    在编译后的js文件中，import { Observable } from 'rxjs/Observable'变成了var Observable_1 = require("rxjs/Observable");
+
+```
 
 #### 2.引用RxJS URL
 
@@ -289,7 +294,7 @@ source$.subscribe(theObserver);
 
 分析代码：
 
-* 第一步：导入Observable类(大概是node版本的原因不能使用import语法，使用了require语法)；
+* 第一步：导入Observable类(js中使用import语法会报错，要使用require语法，ts中可使用import语法)；
 
 * 第二步：创造一个函数onSubscribe，这个函数会作为Observable构造函数的参数，这个函数参数(onSubscribe)完全决定了Observable对象的行为(迭代推送数据)。
 OnSubscribe函数接受一个名为observer的参数，函数体内，调用参数observer的next函数，把数据"推"给observer；
@@ -391,6 +396,50 @@ next item is:koko
 当onSubscribe方法永无休止的接受键盘输入时，观察者的next方法永不休止的执行着。
 
 该java项目gitHub: https://github.com/YuxingXie/aes-base64
+
+其实，讲到这里，这些概念还是非常抽象的。在一个风雨交加的夜晚，我突然想到一个非常好的现实生活中的实例来解释这一切。请听：
+
+我将以一个标准化幼儿园照顾宝宝，宝宝妈妈委托幼儿园照顾自己宝宝的例子来说明观察者模式。代码使用typescript:
+
+首先，幼儿园提供服务，这个服务叫careBaby,它是这样的：
+```typescript
+     let careBaby = (mummy: Mummy) => {
+        console.log("喂宝宝吃水果");
+        mummy.tell("喂宝宝吃水果");
+        console.log("喂宝宝喝牛奶");
+        mummy.tell("喂宝宝喝牛奶");
+    }
+```
+幼儿园的服务就是先喂宝宝吃水果，然后喝牛奶，幼儿园需要通知妈妈宝宝吃了什么，所以需要传入妈妈的实例作为方法参数，还要求妈妈必须留下通知方式，即tell方法。
+careBaby方法相当于onSubscribe方法，妈妈是观察者observer,妈妈的tell方法相当于observer的next方法。
+
+作为提供服务的幼儿园（kindergarten），它提供careBaby服务:
+```javascript
+    const wanyingYoueryuan = new Kindergarten(careBaby);
+    //对应之前的Observable对象的这句代码：const source$ = new Observable(onSubscribe);
+    
+```
+所以幼儿园相当于一个可观察对象，它能够照顾宝宝并通知观察者(妈妈)；
+
+我们在carBaby中调用了mummy.tell(string)方法，意味着妈妈必须具备tell行为的接口或类的实例(妈妈的typescript描述法)：
+```typescript
+interface Mummy {
+    tell(message: string): void;
+}
+```
+现在，妈妈要把宝宝送到万婴幼儿园,先实例化一个妈妈：
+```typescript
+    const mummy = new Mummy(
+    tell: (message) =>{
+        console.log('妈妈收到通知：'+message);
+    }
+);
+```
+然后，妈妈订阅幼儿园的服务：
+```typescript
+    wanyingYoueryuan.careBaby(mummy);
+```
+
 
 w我们看看Observer这个角色，它仅仅关注如何处理消息。当数据流被订阅时，它被当做参数传入。
 

@@ -1,5 +1,5 @@
-// import { Observable } from 'rxjs/Rx';//大概是node版本的原因import语法报错
-const {Observable} = require('rxjs/Rx') ;
+import { Observable } from 'rxjs/Observable';
+// const {Observable} = require('rxjs/Rx') ;
 
 // onSubscribe函数的参数似乎是一个迭代器
 const onSubscribe = observer => {
